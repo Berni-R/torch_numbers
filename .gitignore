@@ -1,0 +1,51 @@
+# data
+data
+
+# MLflow
+mlruns/
+
+# model checkpoints
+checkpoints/
+
+# caches and Co.
+.ipynb_checkpoints
+.idea/
+.mypy_cache
+__pycache__/
+
+# byte-compiled / optimized Python code
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# packaging
+build/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+lib/
+wheels/
+
+# unit tests & coverage reports
+.coverage
+.coverage.*
+.cach
+*.cover
+cover/
+
+# images
+*.png
+*.PNG
+*.jpg
+*.JPG
+
+# pytorch models / lightning logs
+lightning_logs/
+*.pt
+*.pth
+
+# pickle files
+*.pkl
