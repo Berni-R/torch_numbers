@@ -157,9 +157,9 @@ def train(
     expw: dict[str, Any] = dict()
     n_examples: int = len(train_loader.sampler)  # type: ignore
     for epoch in trange(n_epochs):
-        encoder.eval()
-        decoder.eval()
-        sampler.eval()
+        encoder.train()
+        decoder.train()
+        sampler.train()
         with tqdm(total=n_examples, smoothing=pbar_smoothing) as pbar:
             for batch_idx, (imgs, lbls) in enumerate(train_loader):
                 log: dict[str, Any] = {
