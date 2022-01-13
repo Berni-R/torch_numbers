@@ -8,7 +8,7 @@ EXAMPLE_BATCH_SIZE = 2
 
 
 class Encoder(nn.Module):
-    
+
     def __init__(
             self,
             relu_negative_slope: float = 0.1,
@@ -41,7 +41,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    
+
     def __init__(
             self,
             relu_negative_slope: float = 0.1,
@@ -74,4 +74,3 @@ class Decoder(nn.Module):
 
     def forward(self, x: Tensor) -> tuple[Tensor, Tensor]:
         return self.model(x)
-

@@ -27,7 +27,7 @@ def get_dataset(
         emnist_split: Literal['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'] = 'digits',
 ) -> Dataset:
     path = Path(path)
-    
+
     stats = DS_VALUE_STATS[which]
     if which == 'EMNIST':
         stats = stats[emnist_split]
