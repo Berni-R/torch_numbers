@@ -22,11 +22,10 @@ class VAEEncoder(nn.Module):
         self.activate = nn.LeakyReLU(relu_negative_slope, inplace=True)
         self.z_mean = nn.Sequential(
             nn.Linear(interims_dim, encoded_dim),
-            nn.LeakyReLU(relu_negative_slope, inplace=True),
         )
-        self.z_log_var = nn.Sequential(
+        self.z_sigma = nn.Sequential(
             nn.Linear(interims_dim, encoded_dim),
-            nn.LeakyReLU(relu_negative_slope, inplace=True),
+            nn.Softplus(),
         )
 
         self.example_input_array = torch.rand((2, 1, 28, 28))
@@ -35,8 +34,8 @@ class VAEEncoder(nn.Module):
         x = self.encode(imgs)
         x = self.activate(x)
         z_mean = self.z_mean(x)
-        z_log_var = self.z_log_var(x)
-        return z_mean, z_log_var
+        z_sigma = self.z_sigma(x)
+        return z_mean, z_sigma
 
 
 class Sampling(nn.Module):
@@ -44,9 +43,9 @@ class Sampling(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, z_mean: Tensor, z_log_var: Tensor) -> Tensor:
+    def forward(self, z_mean: Tensor, z_sigma: Tensor) -> Tensor:
         eps = torch.randn(z_mean.shape)
-        return z_mean + torch.exp(0.5 * z_log_var) * eps
+        return z_mean + z_sigma * eps
 
 
 class VAEDecoder(nn.Module):

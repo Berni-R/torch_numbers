@@ -14,6 +14,38 @@ def count_params(module: nn.Module, trainable: bool = False) -> int:
     return sum(np.prod(p.shape) for p in module.parameters() if (p.requires_grad or not trainable))
 
 
+def mask_images(
+        imgs: Tensor,
+        size: tuple[int, int],
+        fill: float = 0.0,
+        pos: Optional[ArrayLike] = None,
+) -> tuple[Tensor, Tensor, np.ndarray]:
+    img_shape = tuple(imgs.shape[-2:])
+
+    if pos is None:
+        pos = np.random.randint(0, img_shape[0]-size[0], size=(2, len(imgs)))
+    pos = np.asarray(pos)
+
+    masked_imgs = torch.empty_like(imgs)
+    masked_imgs.copy_(imgs)
+    masked = torch.empty(tuple(imgs.shape[:2]) + size).type_as(imgs)
+
+    for i, (x0, y0) in enumerate(pos.T):
+        masked[i] = imgs[i, :, x0:x0+size[0], y0:y0+size[1]]
+        masked_imgs[i, :, x0:x0+size[0], y0:y0+size[1]] = fill
+    return masked_imgs, masked, pos
+
+
+def fill_mask(imgs: Tensor, fills: Tensor, pos: ArrayLike, size: tuple[int, int]) -> Tensor:
+    pos = np.asarray(pos)
+    unmasked = torch.empty_like(imgs)
+    unmasked.copy_(imgs)
+
+    for i, (x0, y0) in enumerate(pos.T):
+        unmasked[i, :, x0:x0+size[0], y0:y0+size[1]] = fills[i]
+    return unmasked
+
+
 def denorm(img: Union[ArrayLike, Tensor]) -> Union[ArrayLike, Tensor]:
     """From image scaled from -1 to +1, to scale from 0 to 1."""
     return (img + 1) / 2  # type: ignore
@@ -25,6 +57,7 @@ def display_imgs(
         n_columns: int = 10,
         path: Optional[str] = None,
         delete_file: Optional[bool] = None,
+        ipy_display: bool = True,
         denorm: Optional[Callable[[Union[ArrayLike, Tensor]], Union[ArrayLike, Tensor]]] = None,
         invert: bool = True,
 ):
@@ -35,6 +68,7 @@ def display_imgs(
         n_columns (int):                Images are ordered in a grid of this number of columns.
         path (str):                     The path to store the image grid to. (Optional.)
         delete_file (bool):             Whether to delete the image file after displaying.
+        ipy_display (bool):             Actually call `IPython.display`. Helpful, if used outside notebooks.
         denorm (Callable):              A function used to denorm the images.
         invert (bool):                  Invert the images (after denorm), i.e. calculate `1-img`.
     """
@@ -49,7 +83,8 @@ def display_imgs(
     if invert:
         imgs = 1 - imgs  # type: ignore
     save_image(imgs, path, nrow=n_columns)
-    display(Image(path))
+    if ipy_display:
+        display(Image(path))
     if delete_file:
         os.remove(path)
 

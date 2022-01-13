@@ -18,9 +18,11 @@ DS_VALUE_STATS: dict[str, Any] = {
     'CIFAR10': (50000, 10, 0.0, 1.0, (0.4734,), (0.2515,))
 }
 
+DATASET_OPTIONS = Literal['MNIST', 'FashionMNIST', 'EMNIST']
+
 
 def get_dataset(
-        which: Literal['MNIST', 'FashionMNIST', 'EMNIST'],
+        which: DATASET_OPTIONS,
         path: Path = Path('./data'),
         normalize: Optional[Literal['tanh', 'normal', 'sigmoid']] = None,
         emnist_split: Literal['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'] = 'digits',
