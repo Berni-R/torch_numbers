@@ -19,6 +19,7 @@ DS_VALUE_STATS = {
     'CIFAR10': (50000, 10, 0.0, 1.0, (0.4734,), (0.2515,))
 }
 
+
 def get_dataset(
         which: Literal['MNIST', 'FashionMNIST', 'EMNIST'],
         path: Path = './data',

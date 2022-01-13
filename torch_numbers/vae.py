@@ -2,7 +2,6 @@ from typing import Literal
 from torch import Tensor
 import torch
 from torch import nn
-from torch.nn import functional as F
 
 from .base_models import Encoder, Decoder
 
@@ -20,8 +19,14 @@ class VAEEncoder(nn.Module):
 
         self.encode = Encoder(relu_negative_slope=relu_negative_slope, norm=norm, out_dim=interims_dim)
         self.activate = nn.LeakyReLU(relu_negative_slope, inplace=True)
-        self.z_mean = nn.Sequential(nn.Linear(interims_dim, encoded_dim), nn.LeakyReLU(relu_negative_slope, inplace=True))
-        self.z_log_var = nn.Sequential(nn.Linear(interims_dim, encoded_dim), nn.LeakyReLU(relu_negative_slope, inplace=True))
+        self.z_mean = nn.Sequential(
+            nn.Linear(interims_dim, encoded_dim),
+            nn.LeakyReLU(relu_negative_slope, inplace=True),
+        )
+        self.z_log_var = nn.Sequential(
+            nn.Linear(interims_dim, encoded_dim),
+            nn.LeakyReLU(relu_negative_slope, inplace=True),
+        )
 
         self.example_input_array = torch.rand((2, 1, 28, 28))
 
@@ -55,9 +60,12 @@ class VAEDecoder(nn.Module):
     ):
         super().__init__()
 
-        self.dense = nn.Sequential(nn.Linear(encoded_dim, interims_dim), nn.LeakyReLU(relu_negative_slope, inplace=True))
+        self.dense = nn.Sequential(
+            nn.Linear(encoded_dim, interims_dim),
+            nn.LeakyReLU(relu_negative_slope, inplace=True),
+        )
         self.decode = Decoder(relu_negative_slope=relu_negative_slope, norm=norm, in_dim=interims_dim)
-        self.activate = nn.Sigmoid()
+        self.activate = nn.Sigmoid() if final_activation else nn.Identity()
 
         self.example_input_array = torch.rand((2, encoded_dim))
 

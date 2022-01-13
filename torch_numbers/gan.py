@@ -51,7 +51,6 @@ class Generator(nn.Module):
 
     def __init__(
             self,
-            final_activation: bool = True,
             relu_negative_slope: float = 0.1,
             norm: Literal['batch', 'instance'] = 'instance',
             encoded_dim: int = 256,

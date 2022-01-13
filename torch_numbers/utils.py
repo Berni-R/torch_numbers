@@ -11,7 +11,7 @@ from IPython.display import display, Image
 
 def count_params(module: nn.Module, trainable: bool = False) -> int:
     """Count the number of parameters in a module."""
-    return sum(np.prod(p.shape) for p in module.parameters() if (p.requires_grad or not trainbale))
+    return sum(np.prod(p.shape) for p in module.parameters() if (p.requires_grad or not trainable))
 
 
 def denorm(img: Union[ArrayLike, Tensor]) -> Union[ArrayLike, Tensor]:
@@ -66,4 +66,4 @@ def display_examples(gan, n_lines: int = 3, n_columns: int = 10, random: bool = 
         n = torch.arange(n_lines * n_columns) % 10
 
     images = gan(n)
-    display_imgs(images, path=path, n_columns=n_columns, delete_file=delete_file)
+    display_imgs(images, n_columns=n_columns, path=path, delete_file=delete_file, denorm=denorm, invert=invert)
