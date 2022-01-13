@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Optional, Literal
 from torch import Tensor
 import torch
 from torch import nn
@@ -11,14 +11,15 @@ class Discriminator(nn.Module):
 
     def __init__(
             self,
+            encoder: Optional[nn.Module] = None,
+            encoded_dim: int = 256,
             final_activation: bool = True,
             relu_negative_slope: float = 0.1,
             norm: Literal['batch', 'instance'] = 'instance',
-            encoded_dim: int = 256,
     ):
         super().__init__()
 
-        self.encode = Encoder(relu_negative_slope=relu_negative_slope, norm=norm, out_dim=encoded_dim)
+        self.encode = encoder or Encoder(relu_negative_slope=relu_negative_slope, norm=norm, out_dim=encoded_dim)
         self.activate = nn.LeakyReLU(relu_negative_slope, inplace=True)
 
         self.verify = nn.Sequential(
@@ -51,15 +52,15 @@ class Generator(nn.Module):
 
     def __init__(
             self,
+            decoder: Optional[nn.Module] = None,
+            num_classes: int = 10,
             relu_negative_slope: float = 0.1,
             norm: Literal['batch', 'instance'] = 'instance',
-            encoded_dim: int = 256,
-            num_classes: int = 10,
     ):
         super().__init__()
         self.num_classes = num_classes
 
-        self.decode = Decoder(relu_negative_slope=relu_negative_slope, norm=norm, in_dim=num_classes)
+        self.decode = decoder or Decoder(relu_negative_slope=relu_negative_slope, norm=norm, in_dim=num_classes)
         self.activate = nn.Sigmoid()
 
         self.example_input_array = torch.arange(10)
