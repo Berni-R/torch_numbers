@@ -19,7 +19,7 @@ def main(
         latent_dim: int = 30,
         interims_dim: int = 128,
         beta: Optional[float] = None,
-        alpha: Optional[float] = 0.1,
+        alpha: float = 1.0,
         print_model_summary: bool = False,
         pbar_smoothing: float = 0.03,
         save_encoder: Optional[str] = 'VAE_Encoder.pt',
@@ -112,15 +112,16 @@ def prepare(
     else:
         print(f"Decoder has {count_params(decoder, trainable=True):,d} trainable parameters")
 
+    inter_dim = latent_dim // 2 + 1
     z_to_digit = nn.Sequential(
-        nn.Linear(latent_dim, 12),
+        nn.Linear(latent_dim, inter_dim),
         nn.LeakyReLU(),
-        nn.Linear(12, 12),
-        nn.BatchNorm1d(12),
+        nn.Linear(inter_dim, inter_dim),
+        nn.BatchNorm1d(inter_dim),
         nn.LeakyReLU(),
-        nn.Linear(12, 12),
+        nn.Linear(inter_dim, inter_dim),
         nn.LeakyReLU(),
-        nn.Linear(12, 10),
+        nn.Linear(inter_dim, 10),
         nn.Softmax(dim=1),
     )
     if print_model_summary:
@@ -161,7 +162,7 @@ def train(
         sampler.eval()
         with tqdm(total=n_examples, smoothing=pbar_smoothing) as pbar:
             for batch_idx, (imgs, lbls) in enumerate(train_loader):
-                log = {
+                log: dict[str, Any] = {
                     'epoch': epoch,
                     'batch_idx': batch_idx,
                 }
@@ -174,7 +175,7 @@ def train(
                         expw[k] = pbar_smoothing * v + (1 - pbar_smoothing) * expw.get(k, v)
                 pbar.set_postfix_str(
                     "loss={loss:.4}, reconstr_loss={reconstr_loss:.4}, kl_loss={kl_loss:.4}, ".format(**expw)
-                    + "digit_loss={digit_loss:.4}, err={digit_err:.4}, ".format(**expw)  # noqa: W503
+                    + "digit_loss={digit_loss:.4}, err={digit_err:.2%}, ".format(**expw)  # noqa: W503
                 )
                 pbar.update(len(imgs))
 
