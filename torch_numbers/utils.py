@@ -90,8 +90,8 @@ def display_imgs(
 
 
 def display_examples(gan, n_lines: int = 3, n_columns: int = 10, random: bool = False,
-                     path: Optional[str] = None, delete_file: bool = True, denorm: Optional[Callable] = None,
-                     invert: bool = True):
+                     path: Optional[str] = None, delete_file: bool = True, ipy_display: bool = True,
+                     denorm: Optional[Callable] = None, invert: bool = True):
     if path is None:
         path = f"fake_images_{np.random.randint(16 ** 10):010x}.png"
 
@@ -101,4 +101,5 @@ def display_examples(gan, n_lines: int = 3, n_columns: int = 10, random: bool = 
         n = torch.arange(n_lines * n_columns) % 10
 
     images = gan(n)
-    display_imgs(images, n_columns=n_columns, path=path, delete_file=delete_file, denorm=denorm, invert=invert)
+    display_imgs(images, n_columns=n_columns, path=path, delete_file=delete_file, ipy_display=ipy_display,
+                 denorm=denorm, invert=invert)

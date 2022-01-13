@@ -54,14 +54,17 @@ class Generator(nn.Module):
             self,
             decoder: Optional[nn.Module] = None,
             num_classes: int = 10,
+            inter_dim: int = 256,
             relu_negative_slope: float = 0.1,
             norm: Literal['batch', 'instance'] = 'instance',
     ):
         super().__init__()
         self.num_classes = num_classes
 
-        self.decode = decoder or Decoder(relu_negative_slope=relu_negative_slope, norm=norm, in_dim=num_classes)
-        self.activate = nn.Sigmoid()
+        self.linear = nn.Linear(num_classes, inter_dim)
+        self.activate_inter = nn.LeakyReLU(relu_negative_slope, inplace=True)
+        self.decode = decoder or Decoder(relu_negative_slope=relu_negative_slope, norm=norm, in_dim=inter_dim)
+        self.activate_img = nn.Sigmoid()
 
         self.example_input_array = torch.arange(10)
 
@@ -69,7 +72,9 @@ class Generator(nn.Module):
         z = F.one_hot(lbls, num_classes=self.num_classes)
         z = z + 0.1 * torch.randn((len(z), self.num_classes))
 
-        x = self.decode(z)
-        x = self.activate(x)
+        x = self.linear(z)
+        x = self.activate_inter(x)
+        x = self.decode(x)
+        x = self.activate_img(x)
 
         return x
