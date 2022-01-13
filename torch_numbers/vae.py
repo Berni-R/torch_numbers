@@ -1,7 +1,7 @@
 from typing import Optional, Literal
-from torch import Tensor
 import torch
-from torch import nn
+from torch import nn, Tensor
+from torch.nn import functional as F
 
 from .base_models import Encoder, Decoder
 
@@ -20,22 +20,17 @@ class VAEEncoder(nn.Module):
 
         self.encode = encoder or Encoder(relu_negative_slope=relu_negative_slope, norm=norm, out_dim=interims_dim)
         self.activate = nn.LeakyReLU(relu_negative_slope, inplace=True)
-        self.z_mean = nn.Sequential(
-            nn.Linear(interims_dim, encoded_dim),
-        )
-        self.z_sigma = nn.Sequential(
-            nn.Linear(interims_dim, encoded_dim),
-            nn.Softplus(),
-        )
+        self.final_layer = nn.Linear(interims_dim, 2 * encoded_dim)
 
         self.example_input_array = torch.rand((2, 1, 28, 28))
 
     def forward(self, imgs: Tensor) -> tuple[Tensor, Tensor]:
         x = self.encode(imgs)
         x = self.activate(x)
-        z_mean = self.z_mean(x)
-        z_sigma = self.z_sigma(x)
-        return z_mean, z_sigma
+        mu_log_var = self.final_layer(x).view(len(x), 2, -1)
+        mu = mu_log_var[:, 0, :].view(len(x), -1)
+        log_var = mu_log_var[:, 1, :].view(len(x), -1)
+        return mu, log_var
 
 
 class Sampling(nn.Module):
@@ -43,9 +38,17 @@ class Sampling(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, z_mean: Tensor, z_sigma: Tensor) -> Tensor:
-        eps = torch.randn(z_mean.shape)
-        return z_mean + z_sigma * eps
+    def forward(self, mu: Tensor, log_var: Tensor) -> Tensor:
+        if self.training:
+            return mu + torch.exp(0.5 * log_var) * torch.randn(log_var.shape)
+        else:
+            return mu
+
+
+def vae_losses(reconstruction: Tensor, imgs: Tensor, mu: Tensor, log_var: Tensor) -> tuple[Tensor, Tensor]:
+    reconstruction_loss = F.binary_cross_entropy(reconstruction, imgs)
+    kl_loss = 0.5 * torch.mean(mu**2 + log_var.exp() - log_var - 1)
+    return reconstruction_loss, kl_loss
 
 
 class VAEDecoder(nn.Module):
