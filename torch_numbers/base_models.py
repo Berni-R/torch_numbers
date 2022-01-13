@@ -47,7 +47,7 @@ class Decoder(nn.Module):
             relu_negative_slope: float = 0.1,
             norm: Literal['batch', 'instance'] = 'instance',
             in_dim: int = 256,
-            layer_dims: tuple[int, int, int] = (256, 128, 64, 32, 12),
+            layer_dims: tuple[int, ...] = (256, 128, 64, 32, 12),
     ):
         super().__init__()
 

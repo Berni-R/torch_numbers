@@ -1,11 +1,10 @@
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 from pathlib import Path
-from torchvision import datasets
-from torchvision import transforms  # type: ignore
+from torchvision import datasets, transforms  # type: ignore
 from torch.utils.data import Dataset
 
 # number of examples, classes, min(val), max(val), mean(val), std(val)
-DS_VALUE_STATS = {
+DS_VALUE_STATS: dict[str, Any] = {
     'MNIST': (60_000, 10, 0.0, 1.0, (0.1307,), (0.3081,)),
     'FashionMNIST': (60_000, 10, 0.0, 1.0, (0.2860,), (0.3530,)),
     'EMNIST': {
@@ -22,7 +21,7 @@ DS_VALUE_STATS = {
 
 def get_dataset(
         which: Literal['MNIST', 'FashionMNIST', 'EMNIST'],
-        path: Path = './data',
+        path: Path = Path('./data'),
         normalize: Optional[Literal['tanh', 'normal', 'sigmoid']] = None,
         emnist_split: Literal['byclass', 'bymerge', 'balanced', 'letters', 'digits', 'mnist'] = 'digits',
 ) -> Dataset:

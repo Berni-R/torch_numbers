@@ -5,8 +5,8 @@ from torch import Tensor
 import torch
 from torch import nn
 import numpy as np
-from torchvision.utils import save_image
-from IPython.display import display, Image
+from torchvision.utils import save_image  # type: ignore
+from IPython.display import display, Image  # type: ignore
 
 
 def count_params(module: nn.Module, trainable: bool = False) -> int:
@@ -16,7 +16,7 @@ def count_params(module: nn.Module, trainable: bool = False) -> int:
 
 def denorm(img: Union[ArrayLike, Tensor]) -> Union[ArrayLike, Tensor]:
     """From image scaled from -1 to +1, to scale from 0 to 1."""
-    return (img + 1) / 2
+    return (img + 1) / 2  # type: ignore
 
 
 @torch.no_grad()
@@ -25,7 +25,7 @@ def display_imgs(
         n_columns: int = 10,
         path: Optional[str] = None,
         delete_file: Optional[bool] = None,
-        denorm: Optional[Callable] = None,
+        denorm: Optional[Callable[[Union[ArrayLike, Tensor]], Union[ArrayLike, Tensor]]] = None,
         invert: bool = True,
 ):
     """Display images in notebook and simultaneously store them to a file.
@@ -47,7 +47,7 @@ def display_imgs(
     if denorm is not None:
         imgs = denorm(imgs)
     if invert:
-        imgs = 1 - imgs
+        imgs = 1 - imgs  # type: ignore
     save_image(imgs, path, nrow=n_columns)
     display(Image(path))
     if delete_file:
